@@ -21,8 +21,7 @@ class EventController(private val applicationCall: ApplicationCall) {
     suspend fun getTopEvent() {
         try {
             val eventsDto = Event.getAllEvents()
-            val events = eventsDto.map { dtoToReceive(it) }
-            val groupedEvents = events.groupingBy { it.details }.eachCount()
+            val groupedEvents = eventsDto.groupingBy { it.details }.eachCount()
             val combinedEvents = groupedEvents.map { "${it.key} - ${it.value}" }
             val sortedEvents = combinedEvents.sortedByDescending { it.split(" - ")[1].toInt() }
             applicationCall.respond(sortedEvents)
@@ -36,14 +35,6 @@ class EventController(private val applicationCall: ApplicationCall) {
             eventReceive.source,
             eventReceive.time,
             eventReceive.details
-        )
-    }
-    private fun dtoToReceive(dto: EventDTO): EventReceive {
-        return EventReceive(
-            dto.type,
-            dto.source,
-            dto.time,
-            dto.details
         )
     }
 }
