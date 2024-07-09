@@ -20,9 +20,12 @@ class EventController(private val applicationCall: ApplicationCall) {
     }
     suspend fun getTopEvent() {
         try {
-            val events = Event.getAllEvents()
-            val response = events.map { dtoToReceive(it) }
-            applicationCall.respond(response)
+            val eventsDto = Event.getAllEvents()
+            val events = eventsDto.map { dtoToReceive(it) }
+            val groupedEvents = events.groupingBy { it.details }.eachCount()
+            val combinedEvents = groupedEvents.map { "${it.key} - ${it.value}" }
+            val sortedEvents = combinedEvents.sortedByDescending { it.split(" - ")[1].toInt() }
+            applicationCall.respond(sortedEvents)
         } catch (e: Exception) {
             applicationCall.respond(HttpStatusCode.BadRequest, e.localizedMessage)
         }
